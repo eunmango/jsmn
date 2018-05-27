@@ -104,9 +104,9 @@ void printNameList(char * jsonstr, jsmntok_t * t, int * nameTokIndex){
 void selectNameList(char * jsonstr, jsmntok_t * t, int * nameTokIndex){
 	int no, i;
 
-	for (i = 0; i < 20; i++){
-		printf("%d", nameTokIndex[i]);
-}
+//	for (i = 0; i < 20; i++){
+//		printf("%d", nameTokIndex[i]);
+//}
 
 	while(1){
 	printf("Select Name's no(exit 0): " );
@@ -122,10 +122,91 @@ void selectNameList(char * jsonstr, jsmntok_t * t, int * nameTokIndex){
 
 }
 
+void printObject(char * jsonstr, jsmntok_t * t, int tokcount, int * objectIndex){
+	int i, j = 1;
+	//for (i = 0; i < 100; i++){
+	//	printf("%d --\n", nameTokIndex[i]);
+	//}
+	printf("********* Object List *********\n");
+
+	if (t[0].type == JSMN_OBJECT) {
+		printf("[Name %d]%.*s \n", j, t[0+2].end-t[0+2].start,
+			jsonstr + t[0+2].start);
+			objectIndex[j] = 0;
+			j++;
+	}
+
+	for (i = 2; i < tokcount; i++) {
+			/* We may use strndup() to fetch string value */
+			if (t[i].type == JSMN_OBJECT && t[i-1].size != 1)
+			{
+				printf("[Name %d]%.*s \n", j, t[i+2].end-t[i+2].start,
+					jsonstr + t[i+2].start);
+					objectIndex[j] = i;
+			j += 1;
+		}
+	}
+	objectIndex[j] = 999;
+}
+
+void selectObject(char * jsonstr, jsmntok_t * t, int * objectIndex){
+	int no, i, r, j = 1;
+	char str[256], *json;
+	jsmn_parser p;
+	jsmntok_t t1[128];
+
+	json = (char *)malloc(sizeof(str));
+
+	while(1){
+	//p == NULL;
+	printf("Select object's no(exit 0): " );
+	scanf("%d", &no);
+	if (no == 0)
+		break;
+
+	sprintf(json, "%.*s",t[objectIndex[no]].end - t[objectIndex[no]].start, jsonstr + t[objectIndex[no]].start);
+  //printf("%.*s",t[objectIndex[no]].end - t[objectIndex[no]].start, jsonstr + t[objectIndex[no]].start);
+
+	jsmn_init(&p);
+	r = jsmn_parse(&p, json, strlen(json), t1, sizeof(t1)/sizeof(t1[0]));
+
+	//jsonNameList(json, t1, r);
+	printAllObject(json, t1, r);
+
+
+	/*for (i = 0; i < r; i++) {
+		if (t1[i].size == 1)
+		//if (t[i] == '\0') break; //0으로 초기화 되어있고 0은 토큰의 특성상 0을가진 토큰은 없어야됨
+		printf("[%.*s] %.*s\n", t1[i].end	- t1[i].start, jsonstr + t1[i].start, t1[i + 1].end - t1[i + 1].start, jsonstr + t1[i + 1].start);
+	}*/
+
+	}
+}
+
+void printAllObject(char * jsonstr, jsmntok_t * t, int tokcount){
+	int i;
+
+		printf("***** Object List *****\n");
+		for (i = 1; i < tokcount; i++) {
+				/* We may use strndup() to fetch string value */
+				if (t[i].size == 1)
+				{
+					printf("[%.*s] %.*s\n", t[i].end-t[i].start,
+						jsonstr + t[i].start, t[i+1].end-t[i+1].start,
+							jsonstr + t[i+1].start);
+			}
+		}
+		printf("\n");
+
+
+}
+
+
 int main() {
 	int i;
 	int r;
 	int nameTokIndex[100] = {0};
+	int objectIndex[20] = {0};
 	jsmn_parser p;
 	char *JSON;
 	jsmntok_t t[128]; /* We expect no more than 128 tokens */
@@ -145,7 +226,9 @@ int main() {
 	printf("\n");
 	selectNameList(JSON, t, nameTokIndex);
 	printf("\n");
-
+	printObject(JSON, t, r, objectIndex);
+	printf("\n");
+	selectObject(JSON, t, objectIndex);
 
 	if (r < 0) {
 		printf("Failed to parse JSON: %d\n", r);
