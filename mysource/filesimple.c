@@ -41,10 +41,26 @@ char * readJSONFile()	{
 }
 
 void jsonNameList(char * jsonstr, jsmntok_t * t, int tokcount){
-
 	int r, i, j = 1;
 
-	printf("********* Name List *********\n");
+	//printf("********* Name List *********\n");
+	if (tokcount < 0){
+		printf("Failed to parse JSON: %d\n", tokcount);
+		return 1;
+	}
+	if (tokcount < 1 || t[0].type != JSMN_OBJECT) {
+		printf("Object expected\n");
+		return 1;
+	}
+	 for (i = 0; i < tokcount; i++) {
+			/* We may use strndup() to fetch string value */
+				printf("[%d][%d][%d][Name %d]%.*s \n", t[i].size, t[i].type, t[i].parent, j, t[i].end-t[i].start,
+					jsonstr + t[i].start);
+			j += 1;
+		}
+
+j = 1;
+	printf("\n\n********* Name List *********\n");
 	if (tokcount < 0){
 		printf("Failed to parse JSON: %d\n", tokcount);
 		return 1;
@@ -55,15 +71,24 @@ void jsonNameList(char * jsonstr, jsmntok_t * t, int tokcount){
 	}
 	for (i = 1; i < tokcount; i++) {
 			/* We may use strndup() to fetch string value */
-			if (t[i].size == 1)
-			{
-				printf("[Name %d]%.*s \n", j, t[i].end-t[i].start,
+			if(t[i].parent == 0){
+					printf("[[Name %d]%.*s \n", j, t[i].end-t[i].start,
 					jsonstr + t[i].start);
 			j += 1;
 		}
 	}
 }
 
+
+
+/*
+if (t[i].size == 1)
+{
+	printf("[%d][Name %d]%.*s \n", t[i].size, j, t[i].end-t[i].start,
+		jsonstr + t[i].start);
+j += 1;
+}
+*/
 void jsonNameList2(char * jsonstr, jsmntok_t * t, int tokcount, int * nameTokIndex){
 
 		int r, i, j = 1;
@@ -129,16 +154,10 @@ void printObject(char * jsonstr, jsmntok_t * t, int tokcount, int * objectIndex)
 	//}
 	printf("********* Object List *********\n");
 
-	if (t[0].type == JSMN_OBJECT) {
-		printf("[Name %d]%.*s \n", j, t[0+2].end-t[0+2].start,
-			jsonstr + t[0+2].start);
-			objectIndex[j] = 0;
-			j++;
-	}
 
-	for (i = 2; i < tokcount; i++) {
+	for (i = 0; i < tokcount; i++) {
 			/* We may use strndup() to fetch string value */
-			if (t[i].type == JSMN_OBJECT && t[i-1].size != 1)
+			if (t[i].type == JSMN_OBJECT && t[i].parent == -1)
 			{
 				printf("[Name %d]%.*s \n", j, t[i+2].end-t[i+2].start,
 					jsonstr + t[i+2].start);
@@ -240,9 +259,5 @@ int main() {
 		printf("Object expected\n");
 		return 1;
 	}
-
-
-
-
 	return EXIT_SUCCESS;
 }
