@@ -7,7 +7,7 @@
  * A small example of jsmn parsing when JSON structure is known and number of
  * tokens is predictable.
  */
-
+void printAllObject(char * jsonstr, jsmntok_t * t, int tokcount);
 static const char *JSON_STRING =
 	"{\"user\": \"johndoe\", \"admin\": false, \"uid\": 1000,\n  "
 	"\"groups\": [\"users\", \"wheel\", \"audio\", \"video\"]}";
@@ -22,7 +22,14 @@ static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
 
 char * readJSONFile()	{
 	FILE * fp;
-	fp = fopen("data.json", "rt");
+	char filename[20];
+	printf("Enter your file name: ");
+	scanf("%s", filename);
+	fp = fopen(filename, "rt");
+	if (fp == NULL){
+		printf("file open failed\n");
+		exit(0);
+	}
 	int count;
 	char str[256], *json;
 	json = (char *)malloc(sizeof(str));
@@ -42,15 +49,11 @@ char * readJSONFile()	{
 
 void jsonNameList(char * jsonstr, jsmntok_t * t, int tokcount){
 	int r, i, j = 1;
+	int parentindex = 999;
 
 	//printf("********* Name List *********\n");
 	if (tokcount < 0){
 		printf("Failed to parse JSON: %d\n", tokcount);
-		return 1;
-	}
-	if (tokcount < 1 || t[0].type != JSMN_OBJECT) {
-		printf("Object expected\n");
-		return 1;
 	}
 	 for (i = 0; i < tokcount; i++) {
 			/* We may use strndup() to fetch string value */
@@ -60,23 +63,46 @@ void jsonNameList(char * jsonstr, jsmntok_t * t, int tokcount){
 		}
 
 j = 1;
-	printf("\n\n********* Name List *********\n");
+	printf("\n\n********* Name List1 *********\n");
 	if (tokcount < 0){
 		printf("Failed to parse JSON: %d\n", tokcount);
-		return 1;
 	}
-	if (tokcount < 1 || t[0].type != JSMN_OBJECT) {
-		printf("Object expected\n");
-		return 1;
-	}
-	for (i = 1; i < tokcount; i++) {
+	for (i = 0; i < tokcount; i++) {
 			/* We may use strndup() to fetch string value */
-			if(t[i].parent == 0){
-					printf("[[Name %d]%.*s \n", j, t[i].end-t[i].start,
-					jsonstr + t[i].start);
+			if(t[0].type == JSMN_OBJECT && t[2].type == JSMN_ARRAY){		//data4 에서 사용될 곳
+				if (i == 0)
+							continue;					// 0인 경우는 뛰어넘 1부터 시작
+				if (t[i].type == JSMN_OBJECT) {							//object를 만났을때 parentindex를 업데이트
+					parentindex = i;
+				}
+				if(t[i].parent == parentindex){								//업데이트한 parentindex가 parent값인 토큰만 출력
+					printf("[[Name %d]%.*s \n", j, t[i].end-t[i].start, jsonstr + t[i].start);
+					j += 1;
+				}
+	}
+	else if(t[0].type == JSMN_OBJECT && t[2].type != JSMN_ARRAY){		//data1, data2에서 사용될 곳
+		if (t[i].type == JSMN_OBJECT && t[i].parent == -1)						// 맨 처음 object만
+		{
+			parentindex = i;																						//parent로 등록
+		}
+		if (t[i].parent == parentindex){														//parent로 등록한 값을 가지고
+			printf("[[Name %d]%.*s \n", j, t[i].end-t[i].start, jsonstr + t[i].start);	//토큰 출력
 			j += 1;
 		}
 	}
+	else if(t[0].type == JSMN_ARRAY){		//data3에서 사용될 곳
+		if (t[i].type == JSMN_OBJECT )
+		{
+			parentindex = i;																						//parent로 등록
+		}
+		if (t[i].parent == parentindex){														//parent로 등록한 값을 가지고
+			printf("[[Name %d]%.*s \n", j, t[i].end-t[i].start, jsonstr + t[i].start);	//토큰 출력
+			j += 1;
+		}
+	}
+
+
+}
 }
 
 
@@ -92,22 +118,47 @@ j += 1;
 void jsonNameList2(char * jsonstr, jsmntok_t * t, int tokcount, int * nameTokIndex){
 
 		int r, i, j = 1;
+		int parentindex = 999;
+
+
 		if (tokcount < 0){
 			printf("Failed to parse JSON: %d\n", tokcount);
-			return 1;
 		}
-		if (tokcount < 1 || t[0].type != JSMN_OBJECT) {
-			printf("Object expected\n");
-			return 1;
-		}
-		for (i = 1; i < tokcount; i++) {
+		for (i = 0; i < tokcount; i++) {
 				/* We may use strndup() to fetch string value */
-				if (t[i].size == 1)
-				{
-					nameTokIndex[j] = i;
-					j++;
+				if(t[0].type == JSMN_OBJECT && t[2].type == JSMN_ARRAY){//data3에서 사용될 곳
+					if (i == 0)
+								continue;
+					if (t[i].type == JSMN_OBJECT) {
+						parentindex = i;
+					}
+					if(t[i].parent == parentindex){
+						nameTokIndex[j] = i;
+						j += 1;
+					}
+		}
+		else if(t[0].type == JSMN_OBJECT && t[2].type != JSMN_ARRAY){										//data1, data2에서 사용될 곳
+			if (t[i].type == JSMN_OBJECT && t[i].parent == -1)
+			{
+				parentindex = i;
+			}
+			if (t[i].parent == parentindex){
+				nameTokIndex[j] = i;
+				j += 1;
 			}
 		}
+		else if(t[0].type == JSMN_ARRAY){		//data3에서 사용될 곳
+			if (t[i].type == JSMN_OBJECT )
+			{
+				parentindex = i;																						//parent로 등록
+			}
+			if (t[i].parent == parentindex){														//parent로 등록한 값을 가지고
+				nameTokIndex[j] = i;
+				j += 1;
+			}
+		}
+
+	}
 }
 
 void printNameList(char * jsonstr, jsmntok_t * t, int * nameTokIndex){
@@ -115,7 +166,7 @@ void printNameList(char * jsonstr, jsmntok_t * t, int * nameTokIndex){
 	//for (i = 0; i < 100; i++){
 	//	printf("%d --\n", nameTokIndex[i]);
 	//}
-	printf("********* Name List *********\n");
+	printf("********* Name List2 *********\n");
 	for (i = 0; i < 100; i++){
 
 	if (nameTokIndex[i] != 0){
@@ -149,6 +200,7 @@ void selectNameList(char * jsonstr, jsmntok_t * t, int * nameTokIndex){
 
 void printObject(char * jsonstr, jsmntok_t * t, int tokcount, int * objectIndex){
 	int i, j = 1;
+	int parentindex = 999;
 	//for (i = 0; i < 100; i++){
 	//	printf("%d --\n", nameTokIndex[i]);
 	//}
@@ -157,14 +209,35 @@ void printObject(char * jsonstr, jsmntok_t * t, int tokcount, int * objectIndex)
 
 	for (i = 0; i < tokcount; i++) {
 			/* We may use strndup() to fetch string value */
-			if (t[i].type == JSMN_OBJECT && t[i].parent == -1)
+
+			if (t[0].type == JSMN_OBJECT && t[2].type == JSMN_ARRAY)	//data4에서만 사용될 곳
 			{
-				printf("[Name %d]%.*s \n", j, t[i+2].end-t[i+2].start,
-					jsonstr + t[i+2].start);
-					objectIndex[j] = i;
-			j += 1;
-		}
+				if(i == 0)			//0인 경우는 건너뛰고 1부터 시작할 것임
+					continue;
+
+				if (t[i].type == JSMN_OBJECT){							//object이면 그 곳의 첫번째 value만 출력
+				printf("[Name %d]%.*s \n", j, t[i+2].end-t[i+2].start, jsonstr + t[i+2].start);
+						objectIndex[j] = i;										//objectIndex 배열에도 값 저장
+				j += 1;
+				}
+			}
+			else if (t[0].type == JSMN_ARRAY){					//data3에서만 사용될 곳
+				if (t[i].type == JSMN_OBJECT){							//object이면 그 곳의 첫번째 value만 출력
+				printf("[Name %d]%.*s \n", j, t[i+2].end-t[i+2].start, jsonstr + t[i+2].start);
+						objectIndex[j] = i;										//objectIndex 배열에도 값 저장
+				j += 1;
+				}
+			}
+			else																									// data1, data2에서만 사용될 곳
+			{
+				if (t[i].type == JSMN_OBJECT && t[i].parent == -1){	    //첫번 째 object만 고려
+				printf("[Name %d]%.*s \n", j, t[i+2].end-t[i+2].start,jsonstr + t[i+2].start);
+						objectIndex[j] = i;												//objectIndex 배열에도 값 저장
+				j += 1;
+				}
+			}
 	}
+
 	objectIndex[j] = 999;
 }
 
@@ -205,7 +278,6 @@ void selectObject(char * jsonstr, jsmntok_t * t, int * objectIndex){
 void printAllObject(char * jsonstr, jsmntok_t * t, int tokcount){
 	int i;
 
-		printf("***** Object List *****\n");
 		for (i = 1; i < tokcount; i++) {
 				/* We may use strndup() to fetch string value */
 				if (t[i].size == 1)
@@ -241,8 +313,8 @@ int main() {
 	jsonNameList(JSON, t, r);
 	printf("\n");
 	jsonNameList2(JSON, t, r, nameTokIndex);
-	printNameList(JSON, t, nameTokIndex);
-	printf("\n");
+	//printNameList(JSON, t, nameTokIndex);
+//	printf("\n");
 	selectNameList(JSON, t, nameTokIndex);
 	printf("\n");
 	printObject(JSON, t, r, objectIndex);
@@ -255,9 +327,5 @@ int main() {
 	}
 
 	/* Assume the top-level element is an object */
-	if (r < 1 || t[0].type != JSMN_OBJECT) {
-		printf("Object expected\n");
-		return 1;
-	}
 	return EXIT_SUCCESS;
 }
