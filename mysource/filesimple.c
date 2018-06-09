@@ -258,7 +258,7 @@ void selectObject(char * jsonstr, jsmntok_t * t, int * objectIndex){
 
 	sprintf(json, "%.*s",t[objectIndex[no]].end - t[objectIndex[no]].start, jsonstr + t[objectIndex[no]].start);
   //printf("%.*s",t[objectIndex[no]].end - t[objectIndex[no]].start, jsonstr + t[objectIndex[no]].start);
-
+//printf("]]]]]]]%s", json);
 	jsmn_init(&p);
 	r = jsmn_parse(&p, json, strlen(json), t1, sizeof(t1)/sizeof(t1[0]));
 
