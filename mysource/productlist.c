@@ -114,7 +114,7 @@ void jsonNameList(char * jsonstr, jsmntok_t * t, int tokcount, NameTokInfo *name
 
 
 	//printf("********* Name List *********\n");
-	printf("ddd[%d]", nameTokInfo[0].tokindex);
+	// printf("ddd[%d]", nameTokInfo[0].tokindex);
 	if (tokcount < 0){
 		printf("Failed to parse JSON: %d\n", tokcount);
 	}
@@ -143,7 +143,7 @@ j = 1;
 			}
 
 			printf("****************************************************************************************\n");
-			printf("번호\t\t제품명\t\t제조사\t\t가격\t\t갯수\t\t총가격\n");
+			printf("번호\t\t제조사\t\t제품명\t\t가격\t\t갯수\t\t총가격\n");
 			printf("****************************************************************************************\n");
 			 for (i = 0; i < k; i++) {
 			 		/* We may use strndup() to fetch string value */

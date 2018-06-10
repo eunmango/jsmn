@@ -1,0 +1,29 @@
+{
+  "Snack" :
+  [
+    {
+      "company" : "해태",
+      "name" : "자유시간아몬드",
+      "price" : "1000",
+      "count" : "3"
+      },
+      {
+      "company" : "롯데",
+      "name" : "ABC초콜릿",
+      "price" : "2000",
+      "count" : "2"
+    },
+    {
+    "company" : "오리온",
+    "name" : "쿠쉬쿠쉬크래커",
+    "price" : "1500",
+    "count" : "5"
+  },
+  {
+  "company" : "오리온",
+  "name" : "마이구미포도",
+  "price" : "1000",
+  "count" : "1"
+}
+  ]
+}

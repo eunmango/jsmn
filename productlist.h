@@ -47,13 +47,10 @@ typedef struct {
 #endif
 } jsmntok_t;
 
-
 typedef struct {
 	int tokindex;
 	int objectindex;
 } NameTokInfo;
-
-
 /**
  * JSON parser. Contains an array of token blocks available. Also stores
  * the string being parsed now and current position in that string

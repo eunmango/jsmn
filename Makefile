@@ -32,7 +32,7 @@ myexample: mysource/filesimple.c libjsmn.a
 	 $(CC) $(LDFLAGS) $^ -o $@
 myexample2: mysource/productlist.c libjsmn.a
 	$(CC) $(LDFLAGS) $^ -o $@
-myexample3: mysource/productlist2.c libjsmn.a
+myproduct: mysource/myproduct.c libjsmn.a
 	$(CC) $(LDFLAGS) $^ -o $@
 jsondump: example/jsondump.o libjsmn.a
 	$(CC) $(LDFLAGS) $^ -o $@
@@ -44,5 +44,5 @@ clean:
 	rm -f jsondump
 	rm -f myexample
 	rm -f myexample2
-	rm -f myexample3
+	rm -f myproduect
 .PHONY: all clean test
