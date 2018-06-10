@@ -52,7 +52,8 @@ int Call(char * jsonstr, jsmntok_t * t, int tokcount, NameTokInfo *nameTokInfo){
 	int parentindex = 999;
 	int tokenindex;
 	char *json;
-	char str[500];
+	char str[500], word[10];
+	int priceint, countint;
 	jsmn_parser p;
 	jsmntok_t t1[128];
 
@@ -82,9 +83,15 @@ int Call(char * jsonstr, jsmntok_t * t, int tokcount, NameTokInfo *nameTokInfo){
 			/* We may want to do strtol() here to get numeric value */
 			printf("%6.*s\t\t", t1[i+1].end-t1[i+1].start,
 					str + t1[i+1].start);
+					sprintf(word, "%.*s", t1[i+1].end-t1[i+1].start, str + t1[i+1].start);
+					priceint = atoi(word);
 		} else if (jsoneq(str, &t1[i], "count") == 0) {
 			printf("%6.*s \t\t", t1[i+1].end-t1[i+1].start,
 					str + t1[i+1].start);
+			sprintf(word, "%.*s", t1[i+1].end-t1[i+1].start, str + t1[i+1].start);
+			countint = atoi(word);
+			printf("%d", priceint * countint);
+
 				}
 			}
 }
@@ -135,9 +142,9 @@ j = 1;
 				}
 			}
 
-			printf("**************************************************************************\n");
-			printf("번호\t\t제품명\t\t제조사\t\t가격\t\t갯수\n");
-			printf("**************************************************************************\n");
+			printf("****************************************************************************************\n");
+			printf("번호\t\t제품명\t\t제조사\t\t가격\t\t갯수\t\t총가격\n");
+			printf("****************************************************************************************\n");
 			 for (i = 0; i < k; i++) {
 			 		/* We may use strndup() to fetch string value */
 			//printf("[%d]", nameTokInfo[i].tokindex);
